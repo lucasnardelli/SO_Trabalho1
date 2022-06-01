@@ -91,7 +91,7 @@ void FCFS(Process *p, int len)
 
     for (i = 0; i < len; i++)
     {
-        p[i].turnaround_time = p[i].return_time - p[i].arrive_time;
+        p[i].turnaround_time = p[i].burst + p[i].waiting_time;
         total_waiting_time += p[i].waiting_time;
         total_turnaround_time += p[i].turnaround_time;
         total_response_time += p[i].response_time;
@@ -99,7 +99,7 @@ void FCFS(Process *p, int len)
 
     printf("\tExemplo dado pelo professor: FCFS \n\n");
 
-    pps_print_gantt_chart(p, len);
+    fcfs_print_gantt_chart(p, len);
     printf("\n\tAverage Waiting Time     : %-2.2lf\n", (double)total_waiting_time / (double)len);
     printf("\tAverage Turnaround Time  : %-2.2lf\n", (double)total_turnaround_time / (double)len);
     printf("\tAverage Response Time    : %-2.2lf\n\n", (double)total_response_time / (double)len);
