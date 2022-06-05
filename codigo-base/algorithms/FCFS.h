@@ -97,7 +97,7 @@ void FCFS(Process *p, int len)
         total_response_time += p[i].response_time;
     }
 
-    printf("\tExemplo dado pelo professor: FCFS \n\n");
+    printf("\tFCFS \n\n");
 
     fcfs_print_gantt_chart(p, len);
     printf("\n\tAverage Waiting Time     : %-2.2lf\n", (double)total_waiting_time / (double)len);

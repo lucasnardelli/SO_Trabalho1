@@ -353,7 +353,7 @@ void rr_print_gantt_chart(Process *p, int len, Quantum q)
 
 
 void RR(Process *p, int len, Quantum quantum) {
-    printf("Round-Robin: Implememtar e devolver no final, o tempo de espera, tempo de retorno e o tempo de resposta");
+    int b[len];
 }
 
 #endif
