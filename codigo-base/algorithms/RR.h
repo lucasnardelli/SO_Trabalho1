@@ -5,6 +5,7 @@
 #include "./Process.h"
 #include "./SortingFunction.h"
 #include "./PrintTable.h"
+#include <string.h>
 
 
 void rr_calculate_waiting_time(Process *p, int len, Quantum q)
@@ -85,8 +86,6 @@ void rr_calculate_waiting_time(Process *p, int len, Quantum q)
 void rr_calculate_turnaround_time(Process *p, int len)
 {
 	int i;
-
-
 
 	for (i = 0; i < len; i++)
 		p[i].turnaround_time = p[i].burst + p[i].waiting_time - p[i].arrive_time;
@@ -353,7 +352,74 @@ void rr_print_gantt_chart(Process *p, int len, Quantum q)
 
 
 void RR(Process *p, int len, Quantum quantum) {
-    int b[len];
+    int i, j, tam, continuar = 1;
+    int total_waiting_time = 0;
+    int total_turnaround_time = 0;
+    int total_response_time = 0;
+	Process aux;
+	Process *process;
+	process = (Process *) malloc(sizeof(Process) * len);
+
+	tam = len;
+	process_init(p, len);
+	process_init(process, len);
+
+	for(i=0 ; i<len ; i++){
+		process[i].burst = p[i].burst;
+		strcpy(process[i].id, p[i].id);
+	}
+
+    while(tam > 0){
+		p[0].burst -= quantum;
+		aux = p[0];
+		for(i=0 ; i<tam-1 ; i++){
+			p[i] = p[i+1];
+		}
+		p[tam-1] = aux;
+		if(p[tam-1].burst <= 0){
+			p[tam-1].burst = 0;
+			tam --;
+		}
+	}
+
+	for(i=0 ; i<len ; i++){
+		for(j=0 ; j<len ; j++){
+			if(strcmp(process[i].id, p[j].id) == 0){
+				p[j].burst = process[i].burst;
+			}
+		}
+	}
+	rr_calculate_waiting_time(p, len, quantum);
+	rr_calculate_turnaround_time(p, len);
+
+	for(i=0 ; i<len ; i++){
+		if(i == 0){
+			p[i].response_time = 0;
+		}else{
+			if(p[i-1].burst >= quantum){
+				p[i].response_time = p[i-1].response_time + quantum;
+			}else{
+				p[i].response_time = p[i-1].response_time + p[i-1].burst;
+			}
+		}
+	}
+
+    for (i = 0; i < len; i++)
+    {
+		p[i].return_time = p[i].waiting_time + p[i].burst;
+        total_waiting_time += p[i].waiting_time;
+        total_turnaround_time += p[i].turnaround_time;
+        total_response_time += p[i].response_time;
+    }
+    printf("\tRR\n\n");
+
+    rr_print_gantt_chart(p, len, quantum);
+	
+    printf("\n\tAverage Waiting Time     : %-2.2lf\n", (double)total_waiting_time / (double)len);
+    printf("\tAverage Turnaround Time  : %-2.2lf\n", (double)total_turnaround_time / (double)len);
+    printf("\tAverage Response Time    : %-2.2lf\n\n", (double)total_response_time / (double)len);
+
+    print_table(p, len);
 }
 
 #endif
