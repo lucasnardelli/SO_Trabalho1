@@ -81,11 +81,16 @@ void FCFS(Process *p, int len)
         if(i==0){
             p[i].response_time = 0;
             p[i].waiting_time = 0;
-            p[i].return_time = p[i].burst;
+            p[i].return_time = p[i].burst + p[i].arrive_time;
         } else {
-            p[i].return_time = p[i-1].return_time + p[i].burst;
-            p[i].waiting_time = p[i-1].return_time - p[i].arrive_time;
-            p[i].response_time = p[i-1].return_time - p[i].arrive_time;
+            if(p[i-1].return_time > p[i].arrive_time){
+                p[i].return_time = p[i-1].return_time + p[i].burst;
+                p[i].waiting_time = p[i-1].return_time - p[i].arrive_time;
+            } else {
+                p[i].return_time = p[i].arrive_time + p[i].burst;
+                p[i].waiting_time = 0;
+            }
+            p[i].response_time = p[i].waiting_time;
         }
     }
 
