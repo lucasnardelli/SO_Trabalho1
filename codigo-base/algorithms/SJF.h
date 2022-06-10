@@ -15,8 +15,6 @@ void sjf_calculate_time(Process *p, int len)
 
 	int min = 0;
 
-
-
 	p[0].completed = TRUE;
 	p[0].return_time = p[0].burst;
 	p[0].turnaround_time = p[0].burst - p[0].arrive_time;
@@ -27,47 +25,16 @@ void sjf_calculate_time(Process *p, int len)
 
 
 	for(i = 1; i < len; i++)
-	{
+	{ 
+		p[i].waiting_time = curr_time - p[i].arrive_time;
 
-		for (j = 1; j < len; j++)
-		{
+		p[i].completed = TRUE;
 
-			if (p[j].completed == TRUE)
-				continue;
+		curr_time += p[i].burst;
 
-			else
-			{
-				min = j;
+		p[i].return_time = curr_time;
 
-				break;
-
-			}
-		}
-
-
-		for (j = 1; j < len; j++)
-		{
-
-			if ((p[j].completed == FALSE)
-					&& (p[j].arrive_time <= curr_time)
-						&& (p[j].burst < p[min].burst))
-			{
-				min = j;
-
-			}
-		}
-
-		p[min].waiting_time = curr_time - p[min].arrive_time;
-
-		p[min].completed = TRUE;
-
-
-		curr_time += p[min].burst;
-
-
-		p[min].return_time = curr_time;
-
-		p[min].turnaround_time = p[min].return_time - p[min].arrive_time;
+		p[i].turnaround_time = p[i].return_time - p[i].arrive_time;
 
 	}
 }
@@ -137,15 +104,34 @@ void sjf_print_gantt_chart(Process *p, int len)
 
 
 void SJF(Process *p, int len){
-    int i, j, aux;
+
+    int i, j, aux, cont=1;
     int total_waiting_time = 0;
     int total_turnaround_time = 0;
     int total_response_time = 0;
 	Process auxi;
 
     process_init(p, len);
+	merge_sort_by_arrive_time(p, 0, len);
 
-    for(i=0 ; i<len ; i++){
+	cont=0;
+	while(p[cont].arrive_time < (p[0].burst + p[0].arrive_time)){
+		cont++;
+	}
+
+    for(i=1 ; i<cont ; i++){
+		aux = i;
+		for(j=i ; j<cont ; j++){
+			if(p[aux].burst > p[j].burst){
+				aux = j;
+			}
+		}
+		auxi = p[aux];
+		p[aux] = p[i];
+		p[i] = auxi;
+	}
+
+	for(i=cont ; i<len ; i++){
 		aux = i;
 		for(j=i ; j<len ; j++){
 			if(p[aux].burst > p[j].burst){
@@ -156,7 +142,6 @@ void SJF(Process *p, int len){
 		p[aux] = p[i];
 		p[i] = auxi;
 	}
-
 	sjf_calculate_time(p, len);
 
     for (i = 0; i < len; i++)
