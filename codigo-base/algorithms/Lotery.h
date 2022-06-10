@@ -70,9 +70,11 @@ void Lotery(Process *p, int len) {
     int total_waiting_time = 0;
     int total_turnaround_time = 0;
     int total_response_time = 0;
-    int i, j, cont = 0, inicio=0, fim=0, verifica=1, aleatorio, cont_ordem=0;
+    int i, j, inicio=0, fim=0, verifica=1, aleatorio, cont_ordem=0;
     char **bilhetes, **ordem;
     Process aux;
+
+    int current = 0, quantity=0, vet[len], cont = 0;
 
     srand((unsigned)time(NULL));
     srand(time(NULL));
@@ -82,29 +84,49 @@ void Lotery(Process *p, int len) {
         ordem[i] = malloc (5 * sizeof(char));
     }
 
+    merge_sort_by_arrive_time(p, 0, len);
+
     while(cont_ordem<len){
-        //Soma as prioridades
-        for(i=0 ; i<len ; i++){
-            cont+= p[i].priority;
+        cont = 0;
+        quantity = 0;
+        if(current == 0){
+            for(i=0 ; i<len ; i++){
+                if(p[i].arrive_time == p[i+1].arrive_time){
+                    cont++;
+                }
+            }
+        }else{
+            for(i=0 ; i<len ; i++){
+                if(p[i].completed == FALSE && p[i].arrive_time < current){
+                    cont++;
+                }
+            }
         }
-        
-        //aloca um vetor do tamanho das prioridades
-        bilhetes = malloc(cont * sizeof(char*));
+        printf("%d\n", cont);
         for(i=0 ; i<cont ; i++){
+            quantity += p[i].priority;
+        }
+
+        //aloca um vetor do tamanho das prioridades
+        bilhetes = malloc(quantity * sizeof(char*));
+        for(i=0 ; i<quantity ; i++){
             bilhetes[i] = malloc (5 * sizeof(char));
-        } 
-        
-        for(i=0 ; i<len ; i++){
+        }
+
+        inicio = 0;
+        fim = 0;
+        for(i=0 ; i<cont ; i++){
             fim = inicio + p[i].priority;
             for(j=inicio ; j<fim ; j++){
                 strcpy(bilhetes[j], p[i].id);
             }
             inicio = fim;
         }
+        
 
         do{
             verifica = 0;
-            aleatorio = (rand()%cont);
+            aleatorio = (rand()%quantity);
             for(i=0 ; i<len ; i++){
                 if(strcmp(ordem[i], bilhetes[aleatorio]) == 0){
                     verifica = 1;
@@ -114,6 +136,22 @@ void Lotery(Process *p, int len) {
         }while(verifica);
 
         strcpy(ordem[cont_ordem], bilhetes[aleatorio]);
+
+        for(i=0 ; i<len ; i++){
+            if(strcmp(p[i].id, ordem[cont_ordem]) == 0){
+                if(current < p[i].arrive_time){
+                    current = p[i].burst + (p[i].arrive_time - current);
+                }else{
+                    current+= p[i].burst;
+                }
+                p[i].completed = TRUE;
+                aux = p[i];
+                for(j=i ; j<len ; j++){
+                    p[j] = p[j+1];
+                }
+                p[len-1] = aux;
+            }
+        }
         cont_ordem++;
 
     }
@@ -132,7 +170,7 @@ void Lotery(Process *p, int len) {
         if(i==0){
             p[i].response_time = 0;
             p[i].waiting_time = 0;
-            p[i].return_time = p[i].burst;
+            p[i].return_time = p[i].burst + p[i].arrive_time;
         } else {
             p[i].return_time = p[i-1].return_time + p[i].burst;
             p[i].waiting_time = p[i-1].return_time - p[i].arrive_time;
@@ -148,7 +186,7 @@ void Lotery(Process *p, int len) {
         total_response_time += p[i].response_time;
     }
 
-    printf("\tExemplo dado pelo professor: Lotery \n\n");
+    printf("\tLotery \n\n");
 
     lotery_print_gantt_chart(p, len);
     printf("\n\tAverage Waiting Time     : %-2.2lf\n", (double)total_waiting_time / (double)len);
