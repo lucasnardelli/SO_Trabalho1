@@ -9,33 +9,23 @@
 
 void sjf_calculate_time(Process *p, int len)
 {
-	int i, j;
-
-	int curr_time = 0;
-
-	int min = 0;
+	int i;
 
 	p[0].completed = TRUE;
-	p[0].return_time = p[0].burst;
-	p[0].turnaround_time = p[0].burst - p[0].arrive_time;
+	p[0].return_time = p[0].burst + p[0].arrive_time;
 	p[0].waiting_time = 0;
-	
-	curr_time = p[0].burst;
-
-
+	p[0].response_time = 0;
 
 	for(i = 1; i < len; i++)
 	{ 
-		p[i].waiting_time = curr_time - p[i].arrive_time;
-
-		p[i].completed = TRUE;
-
-		curr_time += p[i].burst;
-
-		p[i].return_time = curr_time;
-
-		p[i].turnaround_time = p[i].return_time - p[i].arrive_time;
-
+		if(p[i-1].return_time > p[i].arrive_time){
+			p[i].return_time = p[i-1].return_time + p[i].burst;
+			p[i].waiting_time = p[i-1].return_time - p[i].arrive_time;
+		} else {
+			p[i].return_time = p[i].arrive_time + p[i].burst;
+			p[i].waiting_time = 0;
+		}
+		p[i].response_time = p[i].waiting_time;
 	}
 }
 
@@ -146,7 +136,7 @@ void SJF(Process *p, int len){
 
     for (i = 0; i < len; i++)
     {
-		p[i].response_time = p[i].return_time;
+		p[i].response_time = p[i].waiting_time;
         p[i].turnaround_time = p[i].return_time - p[i].arrive_time;
         total_waiting_time += p[i].waiting_time;
         total_turnaround_time += p[i].turnaround_time;
