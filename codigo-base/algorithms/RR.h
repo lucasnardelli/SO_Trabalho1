@@ -14,8 +14,6 @@ void rr_calculate_waiting_time(Process *p, int len, Quantum q)
 
 	int curr_time = 0;
 
-
-
 	int *remain_burst_time = (int *)malloc(sizeof(int) * len);
 
 	int *calc_response_time = (int *)malloc(sizeof(int) * len);
@@ -352,49 +350,20 @@ void rr_print_gantt_chart(Process *p, int len, Quantum q)
 
 
 void RR(Process *p, int len, Quantum quantum) {
-    int i, j, tam, continuar = 1;
+    int i;
     int total_waiting_time = 0;
     int total_turnaround_time = 0;
     int total_response_time = 0;
-	Process aux;
-	Process *process;
-	process = (Process *) malloc(sizeof(Process) * len);
 
-	tam = len;
 	process_init(p, len);
-	process_init(process, len);
 
-	for(i=0 ; i<len ; i++){
-		process[i].burst = p[i].burst;
-		strcpy(process[i].id, p[i].id);
-	}
-
-    while(tam > 0){
-		p[0].burst -= quantum;
-		aux = p[0];
-		for(i=0 ; i<tam-1 ; i++){
-			p[i] = p[i+1];
-		}
-		p[tam-1] = aux;
-		if(p[tam-1].burst <= 0){
-			p[tam-1].burst = 0;
-			tam --;
-		}
-	}
-
-	for(i=0 ; i<len ; i++){
-		for(j=0 ; j<len ; j++){
-			if(strcmp(process[i].id, p[j].id) == 0){
-				p[j].burst = process[i].burst;
-			}
-		}
-	}
+	merge_sort_by_arrive_time(p, 0, len);
 	rr_calculate_waiting_time(p, len, quantum);
 	rr_calculate_turnaround_time(p, len);
 
 	for(i=0 ; i<len ; i++){
 		if(i == 0){
-			p[i].response_time = 0;
+			p[i].response_time = p[i].arrive_time;
 		}else{
 			if(p[i-1].burst >= quantum){
 				p[i].response_time = p[i-1].response_time + quantum;

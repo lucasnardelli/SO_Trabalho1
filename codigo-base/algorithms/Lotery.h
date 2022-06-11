@@ -102,7 +102,6 @@ void Lotery(Process *p, int len) {
                 }
             }
         }
-        printf("%d\n", cont);
         for(i=0 ; i<cont ; i++){
             quantity += p[i].priority;
         }

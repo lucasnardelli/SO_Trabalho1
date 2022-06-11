@@ -358,7 +358,28 @@ void srt_print_gantt_chart(Process *p, int len)
 }
 void SRT(Process *p, int len)
 {
-    printf("SRTN - Implememtar e devolver no final, o tempo de espera, tempo de retorno e o tempo de resposta");
+    int i;
+    int total_waiting_time = 0;
+    int total_turnaround_time = 0;
+    int total_response_time = 0;
+    process_init(p, len);
+    srt_calculate_time(p, len);
+    for (i = 0; i < len; i++)
+    {
+		p[i].return_time = p[i].waiting_time + p[i].burst;
+        total_waiting_time += p[i].waiting_time;
+        total_turnaround_time += p[i].turnaround_time;
+        total_response_time += p[i].response_time;
+    }
+    printf("\tSRT\n\n");
+
+    srt_print_gantt_chart(p, len);
+	
+    printf("\n\tAverage Waiting Time     : %-2.2lf\n", (double)total_waiting_time / (double)len);
+    printf("\tAverage Turnaround Time  : %-2.2lf\n", (double)total_turnaround_time / (double)len);
+    printf("\tAverage Response Time    : %-2.2lf\n\n", (double)total_response_time / (double)len);
+
+    print_table(p, len);
 }
 
 #endif
